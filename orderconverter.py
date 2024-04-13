@@ -1,26 +1,44 @@
 import json
+import os
 from datetime import datetime, timedelta
 
-# Path to your text file
-file_path = '/home/volar/order10twitter.txt'
+# Ask for the path to the text file
+file_path = input("Enter the path to the text file: ")
+
+# Set the directory for cookies
+directory = 'cookies'
+if not os.path.exists(directory):
+    os.makedirs(directory)
+    print(f"Directory '{directory}' was created.")
+
+# Check for .gitignore in the cookies directory
+gitignore_path = os.path.join(directory, '.gitignore')
+if not os.path.isfile(gitignore_path):
+    with open(gitignore_path, 'w') as gitignore:
+        gitignore.write('*\n!.gitignore')
+    print(f".gitignore file created in {directory}")
 
 # Calculate expiration date, set far in the future
 future_years = 50  # Years in the future
 expiration_date = datetime.now() + timedelta(days=365 * future_years)
 expiration_timestamp = int(expiration_date.timestamp())
 
+# Counter for file numbering
+file_number = 1
+
 # Read the file and parse the lines
 with open(file_path, 'r') as file:
-    for line_number, line in enumerate(file):
+    for line in file:
         if 'login;password:' in line:
-            parts = line.split(':')
-            username = parts[0].split(';')[-1].strip()
-            password = parts[1].strip()
-            email = parts[2].strip()
-            ct0 = parts[3].strip()
-            auth_token = parts[4].strip()
+            # Extract the fields from each line
+            parts = line.strip().split(':')
+            username = parts[1].strip()
+            password = parts[2].strip()
+            email = parts[3].strip()
+            ct0 = parts[4].strip()
+            auth_token = parts[5].strip()
 
-            # Each cookie info for individual files
+            # Prepare the cookies data structure
             cookies = [
                 {"domain": ".twitter.com", "expirationDate": expiration_timestamp, "hostOnly": False, "httpOnly": False, "name": "auth_token", "path": "/", "sameSite": "unspecified", "secure": True, "session": False, "storeId": "0", "value": auth_token},
                 {"domain": ".twitter.com", "expirationDate": expiration_timestamp, "hostOnly": False, "httpOnly": False, "name": "ct0", "path": "/", "sameSite": "unspecified", "secure": True, "session": False, "storeId": "0", "value": ct0},
@@ -30,8 +48,9 @@ with open(file_path, 'r') as file:
             ]
 
             # Create a unique JSON file for each user
-            file_name = f'cookie_{username}_{line_number+1}.json'
+            file_name = f'{directory}/{username}_cookie_{file_number}.json'
             with open(file_name, 'w') as json_file:
                 json.dump(cookies, json_file, indent=2)
 
             print(f"JSON file {file_name} has been created.")
+            file_number += 1  # Increment the file number for the next file
