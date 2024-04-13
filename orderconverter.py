@@ -19,7 +19,7 @@ if not os.path.isfile(gitignore_path):
     print(f".gitignore file created in {directory}")
 
 # Calculate expiration date, set far in the future
-future_years = 50  # Years in the future
+future_years = 1  # Years in the future
 expiration_date = datetime.now() + timedelta(days=365 * future_years)
 expiration_timestamp = int(expiration_date.timestamp())
 
