@@ -1,5 +1,6 @@
 import json
 import os
+import sys  # Import sys to handle command-line arguments
 from datetime import datetime, timedelta
 
 def process_data(file_path):
@@ -43,7 +44,7 @@ def process_data(file_path):
 def save_user_data(user_data, directory, user_count):
     username = user_data.get('login')
     file_name = f'{directory}/{user_count}_{username}_cookie.json'
-    expiration_timestamp = int((datetime.now() + timedelta(days=365)).timestamp())  # 1 year expiration
+    expiration_timestamp = int((datetime.now() + timedelta(days=1000)).timestamp())  # 3 year expiration
 
     cookies = [
         {"domain": ".twitter.com", "expirationDate": expiration_timestamp, "hostOnly": False, "httpOnly": False, "name": "auth_token", "path": "/", "sameSite": "unspecified", "secure": True, "session": False, "storeId": "0", "value": user_data.get('auth_token')},
@@ -57,5 +58,10 @@ def save_user_data(user_data, directory, user_count):
         json.dump(cookies, json_file, indent=2)
     print(f"JSON file {file_name} has been created.")
 
-file_path = input("Enter the path to the text file: ")
-process_data(file_path)
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python orderconverter.py <path_to_text_file>")
+        sys.exit(1)
+
+    file_path = sys.argv[1]  # Get the file path from command-line arguments
+    process_data(file_path)
